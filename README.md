@@ -1,6 +1,18 @@
 # X Archive OCR
 Uses OCR to make an sqlite database of all the text in images you've uploaded to X.
 
+# File Structure
+```
+├── root
+│   └── Twitter Archive
+│       └── [Month] [Year] (ex. "February 2025)
+│           ├── assets
+│           ├── data
+│           └── Your archive.html
+├── ArchiveOCR.py
+└── README.md
+```
+
 # How to use
 1. Create a folder called "Twitter Archive"
 2. Download your twitter archive and extract it into a file named "[Month] [Year]" (ex. "February 2025")
