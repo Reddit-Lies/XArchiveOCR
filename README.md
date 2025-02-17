@@ -9,4 +9,4 @@ Uses OCR to make an sqlite database of all the text in images you've uploaded to
 4. The python program will check if 'ArchiveIndex.db' exists, if it does not it will create one in the Twitter Archive folder.
 
 # Note
-The program works best with images, it cannot extract data from video, and it does not preserve the text of the tweet itself.
+The program works best with screenshots, it cannot extract data from video, and it does not preserve the text of the tweet itself.
