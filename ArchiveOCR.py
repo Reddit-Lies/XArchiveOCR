@@ -8,8 +8,18 @@ import queue
 import threading
 
 # Connect to ArchiveIndex.db inside Twitter Archive
-conn = sqlite3.connect('Twitter Archive/ArchiveIndex.db')
+db_path = 'Twitter Archive/ArchiveIndex.db'
+conn = sqlite3.connect(db_path)
 c = conn.cursor()
+
+# Check if the OCR table exists, and create it if it doesn't
+c.execute('''CREATE TABLE IF NOT EXISTS OCR (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_url TEXT,
+    OCR_text TEXT,
+    OCR_date TEXT
+)''')
+conn.commit()
 
 # Create a thread-safe queue
 ocr_results_queue = queue.Queue()
@@ -46,11 +56,16 @@ def process_image(file):
     text = pytesseract.image_to_string(Image.open(os.path.join(media_folder, file)))
     progress_bar.update(1)
     date = datetime.now().strftime('%Y-%m-%d')
-    ocr_results_queue.put((os.path.join(media_folder, file), text, date))
+    
+    # Extract numbers from the filename and construct the post URL
+    post_id = file.split('-')[0]
+    post_url = f"https://x.com/a/status/{post_id}"
+    
+    ocr_results_queue.put((post_url, text, date))
 
 
 def db_worker():
-    conn = sqlite3.connect('Twitter Archive/ArchiveIndex.db')
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     batch_count = 0  # Initialize a counter to track the number of processed items in the batch
 
@@ -64,7 +79,7 @@ def db_worker():
                 conn.commit()
             break
         
-        c.execute("INSERT INTO OCR (image_path, OCR_text, OCR_date) VALUES (?, ?, ?)", item)
+        c.execute("INSERT INTO OCR (post_url, OCR_text, OCR_date) VALUES (?, ?, ?)", item)
         batch_count += 1
         
         # Check if the batch size has reached 100
@@ -77,9 +92,9 @@ def db_worker():
 # Before starting the database thread and the image processing
 
 def load_existing_filenames():
-    conn = sqlite3.connect('Twitter Archive/ArchiveIndex.db')
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    c.execute("SELECT image_path FROM OCR")
+    c.execute("SELECT post_url FROM OCR")
     filenames = {os.path.basename(row[0]) for row in c.fetchall()}
     conn.close()
     return filenames
