@@ -6,6 +6,7 @@ Uses OCR to make an sqlite database of all the text in images you've uploaded to
 root
 ├── Twitter Archive
 │   ├── ArchiveOCR.py
+│   ├── ArchiveIndex.db
 │   └── [Month] [Year] (ex. "February 2025)
 │       ├── assets
 │       ├── data
